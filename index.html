@@ -1,31 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ArtVida - AI Image Generator</title>
-  <style>
-    body { font-family: Arial; background: #1a1a1a; color: white; text-align: center; padding: 40px; }
-    input, button { padding: 12px; font-size: 16px; margin: 10px; width: 60%; }
-    img { margin-top: 20px; max-width: 90%; border-radius: 10px; }
-  </style>
+  <meta charset="UTF-8">
+  <title>ArtVida - AI Art Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>🎨 ArtVida - SDXL Image Generator</h1>
-  <input type="text" id="prompt" placeholder="Enter your creative prompt here..." />
-  <button onclick="generateImage()">Generate</button>
-  <div id="result"></div>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+  
+  <h1 class="text-4xl font-bold mb-6 text-center text-pink-400">🎨 ArtVida</h1>
+  <p class="mb-6 text-center text-gray-300">Type a prompt below and generate stunning AI images powered by SDXL</p>
+
+  <div class="w-full max-w-xl">
+    <input
+      id="prompt"
+      type="text"
+      placeholder="e.g. A futuristic city under a purple sky"
+      class="w-full p-3 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400"
+    />
+    <button
+      onclick="generateImage()"
+      class="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white py-3 px-4 rounded-md text-lg transition"
+    >
+      Generate Image
+    </button>
+  </div>
+
+  <div id="loading" class="mt-8 hidden text-pink-300">🎨 Generating your art...</div>
+  <div id="result" class="mt-6 w-full max-w-3xl flex justify-center flex-wrap"></div>
 
   <script>
     async function generateImage() {
       const prompt = document.getElementById("prompt").value;
-      const response = await fetch("https://pragyan-artvidabackend1234.gradio.live/api/predict/", {
+      const loading = document.getElementById("loading");
+      const result = document.getElementById("result");
+
+      result.innerHTML = "";
+      loading.classList.remove("hidden");
+
+      const response = await fetch("https://YOUR-GRADIO-LINK-HERE/api/predict/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: [prompt] })
       });
 
-      const result = await response.json();
-      document.getElementById("result").innerHTML = `<img src="${result.data[0]}" />`;
+      const data = await response.json();
+      loading.classList.add("hidden");
+
+      const img = document.createElement("img");
+      img.src = data.data[0];
+      img.alt = prompt;
+      img.className = "rounded-lg shadow-lg w-full max-w-lg";
+      result.appendChild(img);
     }
   </script>
+
 </body>
 </html>
