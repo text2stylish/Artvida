@@ -2,141 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ArtVida - AI Art Generator</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .fade-in { animation: fadeIn 0.6s ease-in-out; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
+  <title>ArtVida - Test</title>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4 transition-colors duration-300" id="body">
-
-  <div class="flex justify-between items-center mb-6 max-w-5xl mx-auto">
-    <h1 class="text-3xl font-bold text-pink-400">🎨 ArtVida</h1>
-    <button onclick="toggleTheme()" class="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded">Toggle Theme</button>
-  </div>
-
-  <div class="max-w-3xl mx-auto mb-6">
-    <div class="grid sm:grid-cols-3 gap-4 mb-4">
-      <input id="prompt" type="text" placeholder="Describe your art prompt..." class="col-span-2 p-3 rounded bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400"/>
-      <select id="style" class="bg-gray-800 text-white rounded p-2 focus:ring-pink-400 focus:ring-2">
-        <option value="">🎨 Any Style</option>
-        <option value="anime">Anime</option>
-        <option value="digital painting">Digital Painting</option>
-        <option value="oil painting">Oil Painting</option>
-        <option value="3d render">3D Render</option>
-        <option value="pencil sketch">Pencil Sketch</option>
-      </select>
-    </div>
-
-    <div class="flex gap-3 mb-4">
-      <button onclick="generateImage()" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-3 rounded text-lg">🎨 Generate</button>
-      <button onclick="surprisePrompt()" class="bg-gray-700 text-white px-4 rounded hover:bg-gray-600">🎲 Surprise Me</button>
-    </div>
-
-    <div id="status" class="text-center text-pink-300 hidden">⏳ Generating your art...</div>
-
-    <div class="text-sm text-gray-400 mt-3">
-      🔁 <b>Recent Prompts:</b>
-      <ul id="history" class="list-disc pl-5 mt-1"></ul>
-    </div>
-  </div>
-
-  <div id="result" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto"></div>
+<body>
+  <h1>ArtVida Test</h1>
+  <input id="prompt" placeholder="Type your art prompt" />
+  <button onclick="generate()">Generate</button>
+  <div id="result"></div>
 
   <script>
-    const backendURL = "https://e7ec64967c13af1bf6.gradio.live/;
-    const promptInput = document.getElementById("prompt");
-    const result = document.getElementById("result");
-    const status = document.getElementById("status");
+    const backendURL = "https://e7ec64967c13af1bf6.gradio.live/api/predict/";
 
-    function toggleTheme() {
-      const body = document.getElementById('body');
-      const isDark = body.classList.contains('bg-gray-900');
-      body.classList.toggle('bg-gray-900', !isDark);
-      body.classList.toggle('bg-white', isDark);
-      body.classList.toggle('text-white', !isDark);
-      body.classList.toggle('text-gray-900', isDark);
-    }
-
-    function savePromptHistory(prompt) {
-      let history = JSON.parse(localStorage.getItem('artvida-history') || '[]');
-      history.unshift(prompt);
-      history = history.slice(0, 5);
-      localStorage.setItem('artvida-history', JSON.stringify(history));
-      displayHistory();
-    }
-
-    function displayHistory() {
-      const history = JSON.parse(localStorage.getItem('artvida-history') || '[]');
-      const ul = document.getElementById("history");
-      ul.innerHTML = '';
-      history.forEach(p => {
-        const li = document.createElement("li");
-        li.textContent = p;
-        ul.appendChild(li);
-      });
-    }
-
-    function surprisePrompt() {
-      const prompts = [
-        "A futuristic city at sunset in cyberpunk style",
-        "An astronaut riding a horse in space",
-        "A magical forest with glowing mushrooms",
-        "A steampunk dragon flying over mountains",
-        "A robot painting a portrait of a human"
-      ];
-      const random = prompts[Math.floor(Math.random() * prompts.length)];
-      promptInput.value = random;
-    }
-
-    async function generateImage() {
-      const prompt = promptInput.value.trim();
-      const style = document.getElementById("style").value;
-      if (!prompt) return alert("Please enter a prompt!");
-
-      let finalPrompt = prompt;
-      if (style) finalPrompt += `, in ${style} style`;
-
-      status.classList.remove("hidden");
-
+    async function generate() {
+      const prompt = document.getElementById("prompt").value;
       const response = await fetch(backendURL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: [finalPrompt] }),
+        body: JSON.stringify({ data: [prompt] }),
       });
-
       const data = await response.json();
-      status.classList.add("hidden");
-
-      const imgURL = data.data[0];
-      const container = document.createElement("div");
-      container.className = "bg-gray-800 p-2 rounded-lg shadow fade-in";
-
-      const img = document.createElement("img");
-      img.src = imgURL;
-      img.alt = finalPrompt;
-      img.className = "rounded w-full";
-
-      const downloadBtn = document.createElement("a");
-      downloadBtn.href = imgURL;
-      downloadBtn.download = "artvida_image.png";
-      downloadBtn.className = "block text-center mt-2 bg-pink-500 text-white py-2 rounded hover:bg-pink-600";
-      downloadBtn.innerText = "⬇️ Download";
-
-      container.appendChild(img);
-      container.appendChild(downloadBtn);
-      result.prepend(container);
-
-      savePromptHistory(prompt);
+      const imageURL = data.data[0];
+      document.getElementById("result").innerHTML = `<img src="${imageURL}" width="512">`;
     }
-
-    // Load prompt history on page load
-    displayHistory();
   </script>
 </body>
 </html>
